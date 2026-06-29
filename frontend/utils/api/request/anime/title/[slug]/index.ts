@@ -8,5 +8,5 @@ export interface GetAnimeParams {
 
 export type GetAnimeRequestConfig = FetchesRequestConfig<GetAnimeParams>;
 
-export const getAnime = ({ config, params }: GetAnimeRequestConfig) =>
-  api.get<AnimeResponse>(`/title/${params.slug}`, config);
+export const getAnime = ({ config, params }: GetAnimeRequestConfig) => 
+  api.get<AnimeResponse>(`/title?slug=${params.slug}`, config);
