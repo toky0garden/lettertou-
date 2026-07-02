@@ -20,7 +20,7 @@ class KodikService:
             "token": settings.KODIK_TOKEN,
             "types": "anime-serial,anime",
             "limit": 50,
-            "shikimori_rating": "7-10",
+            "shikimori_rating": "8-10",
             "years": "2017-2026",
             "with_material_data": True
         }

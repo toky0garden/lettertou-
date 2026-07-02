@@ -4,19 +4,17 @@ import { useBoolean, useRefState } from '@siberiacancode/reactuse';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
-import { Button } from '../ui';
 import { FrameContent, FrameModal } from './frame-modal';
+import { FrameCard } from './frame-card';
 
 interface FrameProps {
   screenshots: string[];
 }
 
 export function Frame({ screenshots }: FrameProps) {
+  console.log(screenshots);
   const [open, setOpen] = useBoolean(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const prevScreenshotRef = useRefState<HTMLButtonElement>();
-  const nextScreenshotRef = useRefState<HTMLButtonElement>();
 
   const openScreenshot = useCallback((index: number) => {
     setCurrentIndex(index);
@@ -36,18 +34,11 @@ export function Frame({ screenshots }: FrameProps) {
             .map(
               (screenshot, index) =>
                 screenshot && (
-                  <Image
-                    key={index}
-                    alt={`Кадр ${index}`}
-                    className='size-full h-[300px] w-auto cursor-pointer object-cover object-center select-none'
-                    height={720}
-                    quality={80}
+                  <FrameCard
                     src={screenshot}
-                    width={1280}
-                    decoding='sync'
-                    loading='eager'
+                    key={index}
+                    index={index}
                     onClick={() => openScreenshot(index)}
-                    priority
                   />
                 )
             )}
@@ -63,22 +54,29 @@ export function Frame({ screenshots }: FrameProps) {
             width={1280}
           />
 
-          <Button
-            ref={prevScreenshotRef}
-            className='absolute top-1/2 left-4 -translate-y-1/2 text-white'
-            variant='secondary'
+          {/* Левая зона */}
+          <button
+            type='button'
+            className='group absolute inset-y-0 left-0 w-1/2 cursor-pointer border-none bg-transparent outline-none'
             onClick={prevScreenshot}
+            aria-label='Предыдущий кадр'
           >
-            <ChevronLeft size={32} />
-          </Button>
-          <Button
-            ref={nextScreenshotRef}
-            className='rounded-fullp-2 absolute top-1/2 right-4 -translate-y-1/2 text-white'
-            variant='secondary'
+            <span className='absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100'>
+              <ChevronLeft size={32} />
+            </span>
+          </button>
+
+          {/* Правая зона */}
+          <button
+            type='button'
+            className='group absolute inset-y-0 right-0 w-1/2 cursor-pointer border-none bg-transparent outline-none'
             onClick={nextScreenshot}
+            aria-label='Следующий кадр'
           >
-            <ChevronRight size={32} />
-          </Button>
+            <span className='absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100'>
+              <ChevronRight size={32} />
+            </span>
+          </button>
 
           <div className='bg-muted absolute right-4 bottom-4 rounded-lg p-2 text-lg text-white'>
             {currentIndex + 1} / {screenshots.length}

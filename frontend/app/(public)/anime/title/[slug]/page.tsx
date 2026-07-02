@@ -1,5 +1,4 @@
-import { TabsContent } from '@radix-ui/react-tabs';
-import { Star } from 'lucide-react';
+import { CopyIcon, Play, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -11,6 +10,7 @@ import {
   Button,
   buttonVariants,
   Tabs,
+  TabsContent,
   TabsList,
   TabsTrigger,
   Typography
@@ -44,39 +44,57 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function AnimePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const anime = await fetchAnime(slug);
+  console.log(anime);
 
   return (
     <>
-      <div className='bg-muted relative h-80 overflow-hidden'>
+      <div className='relative h-[320px] overflow-hidden md:h-[380px] lg:h-[430px]'>
         <Image
           fill
-          alt={'banner'}
-          className={cn('size-full object-cover object-center', 'blur-sm')}
+          priority
+          alt={`${anime.title ?? 'Anime'} banner`}
           src={anime.poster!}
+          className='scale-105 object-cover object-center blur-sm'
+          sizes='100vw'
         />
+
+        {/* затемнение всего баннера */}
+        <div className='absolute inset-0 bg-black/45' />
+
+        {/* затемнение сверху для хедера */}
+        <div className='absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/70 via-black/30 to-transparent' />
+
+        {/* затемнение снизу, чтобы контент снизу читался лучше */}
+        <div className='from-background via-background/85 absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t to-transparent' />
       </div>
-      <div className='container flex gap-6 pb-4 max-sm:flex-col'>
+      <div className='relative z-10 container -mt-24 flex gap-6 pb-6 max-sm:mt-0 max-sm:flex-col md:-mt-28 lg:-mt-52'>
         <div className='flex w-full max-w-[220px] min-w-[220px] flex-col gap-3 max-sm:m-0 max-sm:max-w-[unset] max-sm:min-w-[unset] max-sm:items-center'>
-          <div className='overflow-hidden rounded-md max-sm:h-[315px] max-sm:w-[210px]'>
+          <div className='bg-card w-full overflow-hidden rounded-xl border border-white/10 shadow-2xl shadow-black/40 max-sm:h-[315px] max-sm:w-[210px]'>
             <AspectRatio ratio={2 / 3}>
               {anime.poster && (
                 <Image
                   alt={anime.title ?? 'Poster'}
-                  className='size-full object-cover object-center select-none'
-                  height={220}
-                  quality={80}
                   src={anime.poster}
-                  width={220}
-                  decoding='sync'
-                  loading='eager'
+                  fill
                   priority
+                  quality={80}
+                  sizes='(max-width: 640px) 210px, 220px'
+                  className='object-cover object-center select-none'
                 />
               )}
             </AspectRatio>
           </div>
 
+          <Button className={cn(buttonVariants({ variant: 'ghost' }), 'w-full p-4.5')}>
+            <Play /> Смотреть
+          </Button>
+
           <Button className={cn(buttonVariants({ variant: 'default' }), 'w-full p-4.5')}>
             <Star /> Избранное
+          </Button>
+
+          <Button className={cn(buttonVariants({ variant: 'outline' }), 'w-full p-4.5 text-white')}>
+            <CopyIcon className='size-4' /> Поделиться
           </Button>
 
           <div className='flex flex-col gap-3 rounded-sm border p-5 max-sm:hidden'>
@@ -96,37 +114,39 @@ export default async function AnimePage({ params }: { params: Promise<{ slug: st
         </div>
 
         <div className='mt-3 mb-6 flex grow flex-col gap-2.5 max-sm:mt-0'>
-          <div className='flex justify-between'>
-            <div>
-              <Typography h3 as='h1' className='text-2xl'>
+          <div className='flex flex-col'>
+            <div className='mb-2 flex items-center'>
+              <Typography h3 as='h1' className='mr-2 text-2xl'>
                 {anime.title}
               </Typography>
-              <p className={cn('text-muted-foreground', 'text-md')}>{anime?.slug}</p>
-            </div>
-            <div>
+
+              <Star className='mr-1' fill='#FFD700' size={20} stroke='#FFD700' />
               {anime.shikimori_rating ||
                 (anime.kinopoisk_rating && (
-                  <p className='flex items-center font-semibold'>
-                    <Star className='mr-1' fill='#FFD700' size={20} stroke='#FFD700' />
+                  <p className='flex items-center font-bold'>
                     <span>
                       {anime.shikimori_rating?.toFixed(1) || anime.kinopoisk_rating?.toFixed(1)}
                     </span>
                   </p>
                 ))}
-              <p className={cn('text-muted-foreground', 'text-md')}>999 оценок</p>
             </div>
-          </div>
 
-          <div className='flex flex-wrap gap-2'>
-            {anime.tags!.map((tag) => (
-              <Link
-                key={tag.id}
-                href={ROUTES.GENRE(tag.genre)}
-                className={cn(badgeVariants({ variant: 'outline' }), 'px-2 text-sm font-bold')}
-              >
-                {tag.genre.charAt(0).toUpperCase() + tag.genre.slice(1)}
-              </Link>
-            ))}
+            <div className='flex flex-wrap gap-2'>
+              {anime.tags!.map((tag) => (
+                <Link
+                  key={tag.id}
+                  href={ROUTES.GENRE(tag.genre)}
+                  className={cn(
+                    badgeVariants({ variant: 'default' }),
+                    'rounded-md px-2 py-3 text-sm font-bold'
+                  )}
+                >
+                  {tag.genre.charAt(0).toUpperCase() + tag.genre.slice(1)}
+                </Link>
+              ))}
+            </div>
+
+            {/* <p className={cn('text-muted-foreground', 'text-md')}>{anime?.slug}</p> */}
           </div>
 
           <Description value={anime?.description} />
@@ -141,7 +161,7 @@ export default async function AnimePage({ params }: { params: Promise<{ slug: st
           )}
 
           <Tabs defaultValue='player'>
-            <TabsList className='my-2 bg-transparent'>
+            <TabsList className='my-2 bg-transparent' variant='line'>
               <TabsTrigger className='cursor-pointer' value='reviews'>
                 Отзывы
               </TabsTrigger>
@@ -149,7 +169,6 @@ export default async function AnimePage({ params }: { params: Promise<{ slug: st
                 Плеер
               </TabsTrigger>
             </TabsList>
-
             <TabsContent value='player'>
               <AnimePlayer anime={anime} />
             </TabsContent>

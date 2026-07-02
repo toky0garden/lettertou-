@@ -1,6 +1,6 @@
 'use client';
 
-import type { AnimeResponse, TranslationResponse } from 'generated';
+import type { AnimeResponse, TranslationResponse } from '@/generated';
 import { useParams } from 'next/navigation';
 import { KodikPlayer, Player } from '@/components/player';
 import { useConfig } from '@/hooks/useConfig';

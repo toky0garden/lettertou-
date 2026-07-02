@@ -31,19 +31,20 @@ export function Description({ value }: DescriptionProps) {
   return (
     <div className='text-md flex flex-col'>
       <p
-        ref={ref}
-        className={cn('text-muted-foreground', clamped ? 'line-clamp-4' : 'line-clamp-none')}
+        className='text-muted-foreground'
+        // ref={ref}
+        // className={cn('text-muted-foreground', clamped ? 'line-clamp-4' : 'line-clamp-none')}
       >
         {value}
       </p>
-      {shouldClamp && (
+      {/* {shouldClamp && (
         <span
           className='text-primary hover:text-primary/80 mt-1 w-0 cursor-pointer'
           onClick={() => toggle()}
         >
           {clamped ? 'Подробнее' : 'Свернуть'}
         </span>
-      )}
+      )} */}
     </div>
   );
 }

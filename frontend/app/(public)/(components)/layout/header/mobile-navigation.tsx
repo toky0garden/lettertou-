@@ -27,9 +27,17 @@ export function MobileNavigation() {
 
   return (
     <Sheet onOpenChange={setOpen} open={open}>
-      <SheetTrigger asChild>
-        <TableOfContents size='20' />
-      </SheetTrigger>
+      <SheetTrigger
+        render={
+          <button
+            type='button'
+            className='flex cursor-pointer items-center border-none bg-transparent p-0'
+            aria-label='Открыть меню'
+          >
+            <TableOfContents size={20} />
+          </button>
+        }
+      />
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Навигация</SheetTitle>
