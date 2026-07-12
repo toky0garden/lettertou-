@@ -53,3 +53,6 @@ class ShortAnimeSchema(BaseModel):
     slug: str
     poster: str | None
     title: str
+    type: str | None = None
+    year: int | None = None
+    anime_status: str | None = None

@@ -24,11 +24,8 @@ def material_to_short(material: Material) -> ShortAnimeSchema:
             else material.title
         ),
         type=material.type,
-        translations=AnimeTranslationSchema(
-            id=material.translation.id,
-            title=material.translation.title,
-            episodes_count=material.episodes_count,
-        ),
+        year=material.year,
+        anime_status=md.anime_status if md else None,
     )
 
 def material_to_anime(material: Material) -> AnimeSchema:
