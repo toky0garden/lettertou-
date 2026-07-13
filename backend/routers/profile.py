@@ -1,7 +1,7 @@
 import logging
 import secrets
 
-from fastapi import APIRouter, Cookie, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Cookie, Depends, File, HTTPException, Request, UploadFile
 
 from schemas.auth import UpdateProfileSchema, UserSchema
 from services.auth import AuthService
@@ -26,6 +26,7 @@ def update_profile(
 @router.post("/me/{image_type}", response_model=UserSchema)
 async def upload_profile_image(
     image_type: str,
+    request: Request,
     image: UploadFile = File(...),
     letter_session: str | None = Cookie(default=None),
     service: AuthService = Depends(),
@@ -48,7 +49,12 @@ async def upload_profile_image(
     )
 
     try:
-        url = await storage.put(pathname, content, image.content_type or "image/jpeg")
+        url = await storage.put(
+            pathname,
+            content,
+            image.content_type or "image/jpeg",
+            request.headers.get("x-vercel-oidc-token"),
+        )
     except BlobStorageError as error:
         raise HTTPException(status_code=502, detail=str(error)) from error
 
@@ -56,14 +62,17 @@ async def upload_profile_image(
         updated_user = service.update_image(letter_session, image_type, url)
     except Exception:
         try:
-            await storage.delete(url)
+            await storage.delete(url, request.headers.get("x-vercel-oidc-token"))
         except BlobStorageError:
             logger.exception("Failed to clean up an unused profile image")
         raise
 
     if previous_url and ".blob.vercel-storage.com/" in previous_url:
         try:
-            await storage.delete(previous_url)
+            await storage.delete(
+                previous_url,
+                request.headers.get("x-vercel-oidc-token"),
+            )
         except BlobStorageError:
             logger.exception("Failed to delete the previous profile image")
 

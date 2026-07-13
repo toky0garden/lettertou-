@@ -13,16 +13,21 @@ class VercelBlobStorage:
     API_URL = "https://vercel.com/api/blob"
 
     @staticmethod
-    def _credentials() -> tuple[str, str]:
-        oidc_token = os.getenv("VERCEL_OIDC_TOKEN")
+    def _credentials(oidc_token: str | None = None) -> tuple[str, str]:
+        oidc_token = oidc_token or os.getenv("VERCEL_OIDC_TOKEN")
         store_id = os.getenv("BLOB_STORE_ID", "").removeprefix("store_")
         if not oidc_token or not store_id:
             raise BlobStorageError("Vercel Blob is not connected to this deployment")
         return oidc_token, store_id
 
     @classmethod
-    def _headers(cls, *, content_type: str | None = None) -> dict[str, str]:
-        oidc_token, store_id = cls._credentials()
+    def _headers(
+        cls,
+        *,
+        oidc_token: str | None = None,
+        content_type: str | None = None,
+    ) -> dict[str, str]:
+        oidc_token, store_id = cls._credentials(oidc_token)
         headers = {
             "Authorization": f"Bearer {oidc_token}",
             "x-api-blob-request-id": (
@@ -36,8 +41,14 @@ class VercelBlobStorage:
             headers["x-content-type"] = content_type
         return headers
 
-    async def put(self, pathname: str, content: bytes, content_type: str) -> str:
-        headers = self._headers(content_type=content_type)
+    async def put(
+        self,
+        pathname: str,
+        content: bytes,
+        content_type: str,
+        oidc_token: str | None = None,
+    ) -> str:
+        headers = self._headers(oidc_token=oidc_token, content_type=content_type)
         headers.update(
             {
                 "x-vercel-blob-access": "public",
@@ -61,8 +72,8 @@ class VercelBlobStorage:
             raise BlobStorageError("Vercel Blob returned an invalid upload response")
         return url
 
-    async def delete(self, url: str) -> None:
-        headers = self._headers()
+    async def delete(self, url: str, oidc_token: str | None = None) -> None:
+        headers = self._headers(oidc_token=oidc_token)
         headers["content-type"] = "application/json"
         try:
             async with AsyncClient(timeout=30) as client:
