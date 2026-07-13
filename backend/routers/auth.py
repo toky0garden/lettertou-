@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Cookie, Depends, Response, status
 
 from schemas.auth import LoginSchema, RegisterSchema, UserSchema
@@ -14,7 +16,7 @@ def set_session_cookie(response: Response, token: str) -> None:
         value=token,
         max_age=int(SESSION_TTL.total_seconds()),
         httponly=True,
-        secure=False,
+        secure=bool(os.getenv("VERCEL")),
         samesite="lax",
         path="/",
     )

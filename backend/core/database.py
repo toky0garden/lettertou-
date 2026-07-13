@@ -1,9 +1,14 @@
 import sqlite3
+import os
 from contextlib import contextmanager
 from pathlib import Path
 
 
-DATABASE_PATH = Path(__file__).resolve().parents[1] / "data" / "app.db"
+DATABASE_PATH = (
+    Path("/tmp") / "lettertou" / "app.db"
+    if os.getenv("VERCEL")
+    else Path(__file__).resolve().parents[1] / "data" / "app.db"
+)
 
 
 def init_database() -> None:

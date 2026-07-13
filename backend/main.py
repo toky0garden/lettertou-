@@ -1,4 +1,5 @@
 import uvicorn
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -10,11 +11,16 @@ from routers.kodik import router as kodik_router
 from routers.auth import router as auth_router
 from routers.profile import router as profile_router
 
-app = FastAPI(root_path="/api");
+app = FastAPI()
+
+frontend_url = os.getenv("FRONTEND_URL")
+allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+if frontend_url:
+    allowed_origins.append(frontend_url.rstrip("/"))
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,7 +40,7 @@ app.include_router(profile_router);
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"status": "ok"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True, log_level="info", use_colors=True, host="localhost", port=8000)

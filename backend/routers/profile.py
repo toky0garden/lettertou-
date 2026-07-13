@@ -1,4 +1,5 @@
 import secrets
+import os
 from pathlib import Path
 
 from fastapi import APIRouter, Cookie, Depends, File, HTTPException, Request, UploadFile
@@ -8,7 +9,11 @@ from services.auth import AuthService
 
 
 router = APIRouter(prefix="/profile", tags=["Profile"])
-UPLOAD_DIR = Path(__file__).resolve().parents[1] / "uploads"
+UPLOAD_DIR = (
+    Path("/tmp") / "lettertou" / "uploads"
+    if os.getenv("VERCEL")
+    else Path(__file__).resolve().parents[1] / "uploads"
+)
 ALLOWED_IMAGES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
 MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
