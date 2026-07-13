@@ -3,8 +3,8 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 from core.database import init_database
+from core.storage import UPLOAD_DIR
 from routers.populars import router as populars_anime_router
 from routers.searchSlug import router as search_anime_router
 from routers.kodik import router as kodik_router
@@ -27,9 +27,8 @@ app.add_middleware(
 )
 
 init_database()
-uploads_dir = Path(__file__).resolve().parent / "uploads"
-uploads_dir.mkdir(exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 app.include_router(populars_anime_router);
 app.include_router(search_anime_router);
