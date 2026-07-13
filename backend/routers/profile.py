@@ -1,7 +1,7 @@
 import logging
 import secrets
 
-from fastapi import APIRouter, Cookie, Depends, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Cookie, Depends, File, HTTPException, Request, Response, UploadFile
 
 from schemas.auth import UpdateProfileSchema, UserSchema
 from services.auth import AuthService
@@ -49,7 +49,7 @@ async def upload_profile_image(
     )
 
     try:
-        url = await storage.put(
+        await storage.put(
             pathname,
             content,
             image.content_type or "image/jpeg",
@@ -58,25 +58,49 @@ async def upload_profile_image(
     except BlobStorageError as error:
         raise HTTPException(status_code=502, detail=str(error)) from error
 
+    url = f"/api/profile/images/{pathname}"
     try:
         updated_user = service.update_image(letter_session, image_type, url)
     except Exception:
         try:
-            await storage.delete(url, request.headers.get("x-vercel-oidc-token"))
+            await storage.delete(pathname, request.headers.get("x-vercel-oidc-token"))
         except BlobStorageError:
             logger.exception("Failed to clean up an unused profile image")
         raise
 
-    if previous_url and ".blob.vercel-storage.com/" in previous_url:
+    image_prefix = "/api/profile/images/"
+    if previous_url.startswith(image_prefix):
         try:
             await storage.delete(
-                previous_url,
+                previous_url.removeprefix(image_prefix),
                 request.headers.get("x-vercel-oidc-token"),
             )
         except BlobStorageError:
             logger.exception("Failed to delete the previous profile image")
 
     return updated_user
+
+
+@router.get("/images/{pathname:path}")
+async def get_profile_image(
+    pathname: str,
+    request: Request,
+    storage: VercelBlobStorage = Depends(),
+):
+    if not pathname.startswith("profiles/") or ".." in pathname.split("/"):
+        raise HTTPException(status_code=404, detail="Изображение не найдено")
+    try:
+        content, content_type = await storage.get(
+            pathname,
+            request.headers.get("x-vercel-oidc-token"),
+        )
+    except BlobStorageError as error:
+        raise HTTPException(status_code=404, detail="Изображение не найдено") from error
+    return Response(
+        content=content,
+        media_type=content_type,
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
 
 
 @router.get("/{username}", response_model=UserSchema)

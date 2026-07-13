@@ -1,6 +1,7 @@
 import os
 import secrets
 import time
+from urllib.parse import quote
 
 from httpx import AsyncClient, HTTPError
 
@@ -51,7 +52,7 @@ class VercelBlobStorage:
         headers = self._headers(oidc_token=oidc_token, content_type=content_type)
         headers.update(
             {
-                "x-vercel-blob-access": "public",
+                "x-vercel-blob-access": "private",
                 "x-add-random-suffix": "0",
             }
         )
@@ -71,6 +72,30 @@ class VercelBlobStorage:
         if not isinstance(url, str) or not url:
             raise BlobStorageError("Vercel Blob returned an invalid upload response")
         return url
+
+    async def get(
+        self,
+        pathname: str,
+        oidc_token: str | None = None,
+    ) -> tuple[bytes, str]:
+        token, store_id = self._credentials(oidc_token)
+        url = (
+            f"https://{store_id}.private.blob.vercel-storage.com/"
+            f"{quote(pathname, safe='/')}"
+        )
+        try:
+            async with AsyncClient(timeout=30) as client:
+                response = await client.get(
+                    url,
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+                response.raise_for_status()
+        except HTTPError as error:
+            raise BlobStorageError("Failed to read image from Vercel Blob") from error
+        return response.content, response.headers.get(
+            "content-type",
+            "application/octet-stream",
+        )
 
     async def delete(self, url: str, oidc_token: str | None = None) -> None:
         headers = self._headers(oidc_token=oidc_token)
