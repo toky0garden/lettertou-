@@ -1,4 +1,5 @@
 import random
+from fastapi import HTTPException, status
 from httpx import AsyncClient
 
 from core.settings import settings
@@ -8,12 +9,16 @@ from utils.anime import remove_duplicate_titles
 
 from schemas.KodikAPI import SearchResponse
 
+# A single shared client: KodikService is instantiated per request via Depends(),
+# so creating an AsyncClient in __init__ would leak a connection pool every call.
+_client = AsyncClient(timeout=15)
+
 class KodikService:
 
     BASE_URL = "https://kodik-api.com/"
 
     def __init__(self):
-        self.client = AsyncClient(timeout=15)
+        self.client = _client
 
     async def get_popular(self):
 
@@ -58,6 +63,9 @@ class KodikService:
         response.raise_for_status()
 
         data = SearchResponse.model_validate(response.json())
+
+        if not data.results:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Аниме не найдено")
 
         return material_to_anime(data.results[0])
 
@@ -111,6 +119,8 @@ class KodikService:
             for season_number in sorted(material.seasons, key=numeric_key):
                 season = material.seasons[season_number]
                 for episode_number in sorted(season.episodes, key=numeric_key):
+                    if not episode_number.isdigit():
+                        continue
                     episode = season.episodes[episode_number]
                     link = episode if isinstance(episode, str) else episode.link
                     episodes.append(

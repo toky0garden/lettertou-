@@ -3,7 +3,7 @@ import secrets
 
 from fastapi import APIRouter, Cookie, Depends, File, HTTPException, Request, Response, UploadFile
 
-from schemas.auth import UpdateProfileSchema, UserSchema
+from schemas.auth import PublicUserSchema, UpdateProfileSchema, UserSchema
 from services.auth import AuthService
 from services.blob import BlobStorageError, VercelBlobStorage
 
@@ -103,6 +103,6 @@ async def get_profile_image(
     )
 
 
-@router.get("/{username}", response_model=UserSchema)
+@router.get("/{username}", response_model=PublicUserSchema)
 def get_profile(username: str, service: AuthService = Depends()):
     return service.get_user_by_username(username)

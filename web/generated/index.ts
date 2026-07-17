@@ -3,6 +3,7 @@ export * from './baseResponse';
 export * from './episodeResponse';
 export * from './loginRequest';
 export * from './profileUserParams';
+export * from './publicUserResponse';
 export * from './registerRequest';
 export * from './tagsResponse';
 export * from './translationResponse';

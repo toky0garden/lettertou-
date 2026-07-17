@@ -1,5 +1,5 @@
 import type { FetchesRequestConfig } from '@siberiacancode/fetches';
-import type { ProfileUserParams, UserResponse } from '@/generated';
+import type { ProfileUserParams, PublicUserResponse, UserResponse } from '@/generated';
 import { api } from '../../instance';
 
 export type GetProfileParams = ProfileUserParams;
@@ -13,7 +13,7 @@ export interface UpdateProfileParams {
 }
 
 export const getProfile = ({ config, params }: GetProfileRequestConfig) => {
-  return api.get<UserResponse>(`/profile/${encodeURIComponent(params.username)}`, config);
+  return api.get<PublicUserResponse>(`/profile/${encodeURIComponent(params.username)}`, config);
 };
 
 export const updateProfile = ({ config, params }: FetchesRequestConfig<UpdateProfileParams>) =>

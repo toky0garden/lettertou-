@@ -1,6 +1,6 @@
 'use client';
 
-import type { UserResponse } from '@/generated';
+import type { PublicUserResponse, UserResponse } from '@/generated';
 import { LogOut, Mail, Pencil, UserRound } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -41,7 +41,7 @@ export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const router = useRouter();
   const [config, setConfig] = useConfig();
-  const [profile, setProfile] = useState<UserResponse | null>(
+  const [profile, setProfile] = useState<PublicUserResponse | UserResponse | null>(
     config.user?.username.toLowerCase() === username.toLowerCase() ? config.user : null
   );
   const [isLoading, setIsLoading] = useState(!profile);
@@ -120,13 +120,15 @@ export default function ProfilePage() {
               <p className='truncate font-medium'>{profile.username}</p>
             </div>
           </div>
-          <div className='bg-muted/50 flex items-center gap-3 rounded-lg border p-4'>
-            <Mail className='text-muted-foreground' aria-hidden='true' />
-            <div className='min-w-0'>
-              <p className='text-muted-foreground text-xs'>Электронная почта</p>
-              <p className='truncate font-medium'>{profile.email}</p>
+          {'email' in profile && (
+            <div className='bg-muted/50 flex items-center gap-3 rounded-lg border p-4'>
+              <Mail className='text-muted-foreground' aria-hidden='true' />
+              <div className='min-w-0'>
+                <p className='text-muted-foreground text-xs'>Электронная почта</p>
+                <p className='truncate font-medium'>{profile.email}</p>
+              </div>
             </div>
-          </div>
+          )}
 
           {isOwnProfile && (
             <div className='mt-3 flex flex-wrap gap-2'>

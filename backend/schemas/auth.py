@@ -20,6 +20,15 @@ class UserSchema(BaseModel):
     banner: str = ""
 
 
+class PublicUserSchema(BaseModel):
+    """Профиль, видимый другим пользователям — без почты."""
+
+    id: int
+    username: str
+    avatar: str = ""
+    banner: str = ""
+
+
 class UpdateProfileSchema(BaseModel):
     email: str | None = Field(default=None, min_length=3, max_length=254)
     current_password: str | None = Field(default=None, min_length=6, max_length=24)

@@ -42,7 +42,7 @@ def material_to_anime(material: Material) -> AnimeSchema:
         age_rating=md.minimal_age if md else None,
 
         title=material.title,
-        description=md.anime_description if md else md.description if md else None,
+        description=(md.anime_description or md.description) if md else None,
 
         poster=(
             md.anime_poster_url
