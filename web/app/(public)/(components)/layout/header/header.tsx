@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 
 import { Button, buttonVariants } from '@/components/ui';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 import { SearchInput } from './search-input';
 
 const ThemeButton = dynamic(() => import('./theme-button').then((module) => module.ThemeButton), {
@@ -60,7 +60,7 @@ export function Header() {
             href='/'
             className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'text-base font-bold')}
           >
-            letter to u!
+            ubuyashiki
           </Link>
 
           <div className='hidden w-full items-center justify-center gap-2 md:flex'>

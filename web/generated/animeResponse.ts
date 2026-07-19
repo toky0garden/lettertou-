@@ -3,6 +3,7 @@ import type { TagsResponse, TranslationResponse } from '.';
 export interface AnimeResponse {
   id: number;
   slug: string;
+  shikimori_id?: number | null;
   age_rating: number;
   iframe_url: string | null;
 

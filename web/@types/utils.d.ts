@@ -27,12 +27,13 @@ interface InfinityQuerySettings<Func = unknown> {
   config?: ApiRequestOptions;
   options?: Omit<
     import('@tanstack/react-query').UseInfiniteQueryOptions<
-      import('@tanstack/react-query').InfiniteData<Awaited<ReturnType<Func>>>,
+      Awaited<ReturnType<Func>>,
       any,
       import('@tanstack/react-query').InfiniteData<Awaited<ReturnType<Func>>>,
+      any,
       any
     >,
-    'getNextPageParam' | 'initialPageParam' | 'queryKey'
+    'getNextPageParam' | 'initialPageParam' | 'queryKey' | 'queryFn'
   >;
 }
 

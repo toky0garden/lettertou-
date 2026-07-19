@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ROUTES, statusMapping, typeMapping } from '@/app/(constants)';
 import { Badge } from '@/components/ui';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 
 type SearchAnime = Pick<
   AnimeResponse,
@@ -29,7 +29,7 @@ export function AnimeSearchResult({ anime, compact = false, onNavigate }: AnimeS
       prefetch
       onClick={onNavigate}
       className={cn(
-        'group hover:bg-muted/60 focus-visible:ring-ring flex rounded-lg outline-none transition-colors focus-visible:ring-2',
+        'group hover:bg-muted/60 focus-visible:ring-ring flex rounded-lg transition-colors outline-none focus-visible:ring-2',
         compact ? 'gap-3 p-2' : 'gap-4 border p-3'
       )}
     >
@@ -48,7 +48,10 @@ export function AnimeSearchResult({ anime, compact = false, onNavigate }: AnimeS
             className='object-cover transition-transform duration-300 group-hover:scale-105'
           />
         ) : (
-          <div className='flex size-full items-center justify-center' aria-label='Постер отсутствует'>
+          <div
+            className='flex size-full items-center justify-center'
+            aria-label='Постер отсутствует'
+          >
             <Film aria-hidden='true' />
           </div>
         )}
@@ -59,7 +62,9 @@ export function AnimeSearchResult({ anime, compact = false, onNavigate }: AnimeS
           <p className={cn('line-clamp-2 font-medium', compact ? 'text-sm' : 'text-base')}>
             {anime.title || 'Без названия'}
           </p>
-          {!compact && <ArrowUpRight className='text-muted-foreground shrink-0' aria-hidden='true' />}
+          {!compact && (
+            <ArrowUpRight className='text-muted-foreground shrink-0' aria-hidden='true' />
+          )}
         </div>
 
         <div className='flex flex-wrap gap-1.5'>

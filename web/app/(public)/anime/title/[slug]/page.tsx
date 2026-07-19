@@ -14,7 +14,7 @@ import {
   TabsTrigger,
   Typography
 } from '@/components/ui';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 import { getAnime } from '@/utils/api/request';
 import { AnimePlayer } from '../../../../../components/anime/anime-player';
 import type { AnimeResponse } from '@/generated';

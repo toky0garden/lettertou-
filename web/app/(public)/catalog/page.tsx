@@ -4,8 +4,18 @@ import { ArrowUpRightIcon, SparklesIcon } from 'lucide-react';
 
 import { genres } from '@/components/catalog/genres';
 import { Badge, Typography } from '@/components/ui';
+import { getGenres } from '@/utils/api/request';
 
-export default function CatalogPage() {
+const formatCount = new Intl.NumberFormat('ru-RU');
+
+export default async function CatalogPage() {
+  // Counts are decorative: the page must render even when the API is down.
+  const counts = await getGenres({})
+    .then((response) =>
+      Object.fromEntries(response.data.map((genre) => [genre.slug, genre.count]))
+    )
+    .catch(() => ({}) as Record<string, number | null | undefined>);
+
   return (
     <main className='container-wrapper py-8 sm:py-12'>
       <div className='container flex flex-col gap-8'>
@@ -54,8 +64,15 @@ export default function CatalogPage() {
                   />
                   <div className='absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent' />
                   <div className='absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 text-white'>
-                    <span className='text-base leading-tight font-semibold text-pretty'>
-                      {genre.title}
+                    <span className='flex flex-col gap-0.5'>
+                      <span className='text-base leading-tight font-semibold text-pretty'>
+                        {genre.title}
+                      </span>
+                      {typeof counts[genre.slug] === 'number' && (
+                        <span className='text-xs text-white/70'>
+                          {formatCount.format(counts[genre.slug] as number)} тайтлов
+                        </span>
+                      )}
                     </span>
                     <span className='flex size-8 shrink-0 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5'>
                       <ArrowUpRightIcon className='size-4' aria-hidden='true' />

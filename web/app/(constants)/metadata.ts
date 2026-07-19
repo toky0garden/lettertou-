@@ -1,11 +1,11 @@
 /* eslint-disable node/prefer-global/process */
 
 export const METADATA = {
-  NAME: 'letter to u!',
+  NAME: 'ubuyashiki',
   URL: process.env.BASE_URL || 'http://localhost:3000',
-  DESCRIPTION: 'letter to u! - Современный сервис просмотра аниме',
+  DESCRIPTION: 'ubuyashiki - Современный сервис просмотра аниме',
   KEYWORDS: [
-    'letter to u!',
+    'ubuyashiki',
     'anime',
     'anime online',
     'watch anime',

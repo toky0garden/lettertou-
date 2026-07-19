@@ -1,12 +1,12 @@
 'use client';
 
-import type { AnimeResponse, TranslationResponse } from '@/generated';
+import type { AnimeResponse } from '@/generated';
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { KodikPlayer, Player } from '@/components/player';
+import { Player } from '@/components/player';
 import { Skeleton } from '@/components/ui';
 import { useConfig } from '@/hooks/useConfig';
-import { cn } from '@/lib/utils';
+import { useGetAnimePlayer } from '@/utils/api/hooks';
+import { cn } from '@/utils/lib/utils';
 
 interface AnimePlayerProps {
   anime: AnimeResponse;
@@ -14,9 +14,12 @@ interface AnimePlayerProps {
 
 export function AnimePlayer({ anime }: AnimePlayerProps) {
   const [mounted, setMounted] = useState(false);
-  const slug = useParams().slug as string;
-  const shikiId = Number(slug.replace(/\s+/g, '_').match(/\d+$/)?.[0]);
   const config = useConfig()[0];
+
+  const { data, isLoading, isError } = useGetAnimePlayer(
+    { slug: anime.slug },
+    { options: { enabled: mounted && config.authenticated } }
+  );
 
   useEffect(() => setMounted(true), []);
 
@@ -24,31 +27,50 @@ export function AnimePlayer({ anime }: AnimePlayerProps) {
     return <Skeleton className='aspect-video w-full rounded-lg' />;
   }
 
-  return !config.authenticated ? (
-    <div
-      className={cn(
-        'bg-background flex items-center justify-center rounded-lg',
-        'text-muted-foreground p-8 text-center'
-      )}
-    >
-      <div>
-        <p className='mb-2 text-lg font-medium'>Плеер недоступен</p>
-        <p className='text-sm'>Авторизируйтесь для просмотра</p>
+  if (!config.authenticated) {
+    return (
+      <div
+        className={cn(
+          'bg-background flex items-center justify-center rounded-lg',
+          'text-muted-foreground p-8 text-center'
+        )}
+      >
+        <div>
+          <p className='mb-2 text-lg font-medium'>Плеер недоступен</p>
+          <p className='text-sm'>Авторизируйтесь для просмотра</p>
+        </div>
       </div>
-    </div>
-  ) : !anime.translations ? (
-    <div className='flex w-full flex-col'>
-      <KodikPlayer
-        className='aspect-video rounded-md'
-        iframeUrl={anime.iframe_url as string}
-        hide_selectors={false}
-      />
-    </div>
-  ) : (
+    );
+  }
+
+  if (isLoading) {
+    return <Skeleton className='aspect-video w-full rounded-lg' />;
+  }
+
+  if (isError || !data?.data) {
+    return (
+      <div
+        className={cn(
+          'bg-background flex items-center justify-center rounded-lg',
+          'text-muted-foreground p-8 text-center'
+        )}
+      >
+        <div>
+          <p className='mb-2 text-lg font-medium'>Плеер недоступен</p>
+          <p className='text-sm'>Не удалось загрузить данные плеера, попробуйте позже</p>
+        </div>
+      </div>
+    );
+  }
+
+  const player = data.data;
+
+  return (
     <Player
-      shikiId={shikiId}
-      title={anime.title!}
-      translations={anime?.translations as TranslationResponse[]}
+      slug={anime.slug}
+      title={anime.title ?? player.translations.at(0)?.title ?? ''}
+      poster={anime.poster ?? null}
+      player={player}
     />
   );
 }

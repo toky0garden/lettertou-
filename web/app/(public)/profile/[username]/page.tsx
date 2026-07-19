@@ -107,7 +107,7 @@ export default function ProfilePage() {
           </Avatar>
           <div className='flex flex-col items-center gap-2'>
             <CardTitle className='text-2xl'>{profile.username}</CardTitle>
-            <Badge variant='default'>Пользователь Letter to U!</Badge>
+            <Badge variant='default'>Пользователь Ubuyashiki</Badge>
           </div>
           <CardDescription>Личный профиль и информация об аккаунте.</CardDescription>
         </CardHeader>

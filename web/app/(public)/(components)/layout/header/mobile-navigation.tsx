@@ -14,7 +14,7 @@ import {
   SheetTitle,
   SheetTrigger
 } from '@/components/ui';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 
 export function MobileNavigation() {
   const [open, setOpen] = useState(false);

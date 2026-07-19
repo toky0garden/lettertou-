@@ -9,7 +9,7 @@ import { Toaster } from '@/components/ui';
 import { Provider } from './providers';
 import '@/assets/styles/tailwind.css';
 import SakuraFall from '@/components/ui/sakura-fall';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 
 const onest = Onest({
   subsets: ['latin', 'cyrillic'],

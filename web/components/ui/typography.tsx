@@ -5,7 +5,7 @@ import { cva } from 'class-variance-authority';
 import type { PropsWithoutRef, RefAttributes } from 'react';
 import React, { useMemo } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 
 interface Props {
   as?: keyof JSX.IntrinsicElements;

@@ -164,6 +164,21 @@ class SearchResponse(BaseModel):
     time: str = Field(..., description="Время выполнения запроса")
     total: int = Field(..., description="Общее количество найденных материалов")
     results: List[Material] = Field(..., description="Список найденных материалов")
+    next_page: Optional[str] = Field(None, description="Ссылка на следующую страницу (/list)")
+    prev_page: Optional[str] = Field(None, description="Ссылка на предыдущую страницу (/list)")
+
+
+class GenreCount(BaseModel):
+    """Элемент ответа /genres"""
+    title: str
+    count: int
+
+
+class GenresResponse(BaseModel):
+    """Ответ от API /genres"""
+    time: str
+    total: int
+    results: List[GenreCount]
 
 
 class ErrorResponse(BaseModel):

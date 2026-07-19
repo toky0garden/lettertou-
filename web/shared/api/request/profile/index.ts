@@ -12,14 +12,13 @@ export interface UpdateProfileParams {
   new_password?: string;
 }
 
-export const getProfile = ({ config, params }: GetProfileRequestConfig) => {
-  return api.get<PublicUserResponse>(`/profile/${encodeURIComponent(params.username)}`, config);
-};
+export const getProfile = ({ config, params }: GetProfileRequestConfig) =>
+  api.get<PublicUserResponse>(`/profile/${encodeURIComponent(params.username)}`, config);
 
-export const updateProfile = ({ config, params }: FetchesRequestConfig<UpdateProfileParams>) =>
+export const postUpdateProfile = ({ config, params }: FetchesRequestConfig<UpdateProfileParams>) =>
   api.patch<UserResponse>('/profile/me', params, config);
 
-export const uploadProfileImage = (
+export const postUploadAvatar = (
   imageType: 'avatar' | 'banner',
   image: File,
   config?: FetchesRequestConfig['config']

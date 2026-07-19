@@ -2,9 +2,16 @@ from schemas.KodikAPI import Material
 from schemas.anime import (
     ShortAnimeSchema,
     AnimeSchema,
+    SwiperBannerSchema,
     TagsScheme,
     AnimeTranslationSchema,
 )
+
+
+def material_shikimori_id(material: Material) -> int | None:
+    if material.shikimori_id and material.shikimori_id.isdigit():
+        return int(material.shikimori_id)
+    return None
 
 
 def material_to_short(material: Material) -> ShortAnimeSchema:
@@ -38,6 +45,8 @@ def material_to_anime(material: Material) -> AnimeSchema:
     return AnimeSchema(
         id=material.id,
         slug=material.id,
+
+        shikimori_id=material_shikimori_id(material),
 
         age_rating=md.minimal_age if md else None,
 
@@ -87,4 +96,32 @@ def material_to_anime(material: Material) -> AnimeSchema:
         ],
 
         shikimori_rating=md.shikimori_rating if md else None,
+    )
+
+
+def material_to_banner(material: Material) -> SwiperBannerSchema | None:
+    """Map a material to a hero banner card.
+
+    Returns None when the material lacks the fields a banner needs
+    (poster + description), so callers can simply filter it out.
+    """
+    md = material.material_data
+    if not md:
+        return None
+
+    poster = md.anime_poster_url or md.poster_url
+    description = md.anime_description or md.description
+    if not poster or not description:
+        return None
+
+    return SwiperBannerSchema(
+        id=material.id,
+        slug=material.id,
+        age_rating=md.minimal_age,
+        anime_status=md.anime_status,
+        type=material.type,
+        title=md.anime_title or material.title,
+        description=description,
+        poster=poster,
+        shikimori_rating=md.shikimori_rating,
     )

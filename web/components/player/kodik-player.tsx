@@ -2,7 +2,7 @@
 
 import { useWindowEvent } from '@siberiacancode/reactuse';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 
 interface KodikMessage {
   key: string;

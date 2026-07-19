@@ -5,7 +5,7 @@
 import { useBoolean, useRefState } from '@siberiacancode/reactuse';
 
 import { useLayoutEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 
 interface DescriptionProps {
   value?: string | null;

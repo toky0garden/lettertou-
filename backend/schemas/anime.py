@@ -23,6 +23,7 @@ class AnimeBannerSchema(BaseModel):
 class AnimeSchema(BaseModel):
     id: str
     slug: str
+    shikimori_id: int | None = None
     age_rating: int | None
     title: str
     description: str | None
@@ -56,3 +57,30 @@ class ShortAnimeSchema(BaseModel):
     type: str | None = None
     year: int | None = None
     anime_status: str | None = None
+
+class GenreAnimeListSchema(BaseModel):
+    results: list[ShortAnimeSchema]
+    next_page: str | None = None
+
+class PlayerTranslationSchema(BaseModel):
+    id: int
+    title: str
+    type: str | None = None
+    quality: str | None = None
+    episodes_count: int | None = None
+
+class PlayerSchema(BaseModel):
+    shikimori_id: int | None
+    iframe_url: str
+    translations: list[PlayerTranslationSchema]
+
+class SwiperBannerSchema(BaseModel):
+    id: str
+    slug: str
+    age_rating: int | None = None
+    anime_status: str | None = None
+    type: str | None = None
+    title: str
+    description: str
+    poster: str
+    shikimori_rating: float | None = None

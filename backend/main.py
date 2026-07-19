@@ -1,6 +1,7 @@
 import uvicorn
 import os
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
 from core.database import init_database
 from routers.populars import router as populars_anime_router
@@ -8,6 +9,8 @@ from routers.searchSlug import router as search_anime_router
 from routers.kodik import router as kodik_router
 from routers.auth import router as auth_router
 from routers.profile import router as profile_router
+from routers.genres import router as genres_router
+from routers.home import router as home_router
 
 app = FastAPI()
 
@@ -31,6 +34,25 @@ app.include_router(search_anime_router);
 app.include_router(kodik_router);
 app.include_router(auth_router);
 app.include_router(profile_router);
+app.include_router(genres_router);
+app.include_router(home_router);
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    schema = get_openapi(
+        title="Anime API",
+        version="1.0.0",
+        description="Anime streaming API",
+        routes=app.routes,
+    )
+
+    app.openapi_schema = schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
 
 
 @app.get("/")

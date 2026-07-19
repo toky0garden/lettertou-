@@ -1,6 +1,6 @@
 'use client';
 
-import type { TranslationResponse } from '@/generated';
+import type { PlayerTranslationResponse } from '@/generated';
 import {
   AudioLines,
   Captions,
@@ -11,16 +11,16 @@ import {
   StepForward
 } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui';
+import { cn } from '@/utils/lib/utils';
+import { Badge, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui';
 import { useState } from 'react';
 
 interface TranslationSelectorProps {
   title: string;
   selectedEpisode: number;
-  translations: TranslationResponse[];
-  selectedTranslation: TranslationResponse;
-  setSelectedTranslation: (translation: TranslationResponse) => void;
+  translations: PlayerTranslationResponse[];
+  selectedTranslation: PlayerTranslationResponse;
+  setSelectedTranslation: (translation: PlayerTranslationResponse) => void;
 }
 
 export function TranslationSelector({
@@ -40,7 +40,12 @@ export function TranslationSelector({
     currentPage * TRANSLATIONS_PER_PAGE
   );
 
-  const getTranslationType = (translation: TranslationResponse) => {
+  const getTranslationType = (translation: PlayerTranslationResponse) => {
+    // The backend sends the real Kodik type; the title heuristic stays as fallback.
+    if (translation.type) {
+      return translation.type === 'subtitles' ? 'captions' : 'mic';
+    }
+
     const title = translation.title.toLowerCase();
 
     if (title.includes('sub') || title.includes('суб')) {
@@ -65,12 +70,14 @@ export function TranslationSelector({
         </Button>
         <Sheet>
           <SheetTrigger
-            render={<Button
-              className={cn(buttonVariants({ variant: 'secondary' }), 'bg-background')}
-              size='icon'
-            />}
+            render={
+              <Button
+                className={cn(buttonVariants({ variant: 'secondary' }), 'bg-background')}
+                size='icon'
+              />
+            }
           >
-              <AudioLines className='size-5' />
+            <AudioLines className='size-5' />
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
@@ -97,6 +104,11 @@ export function TranslationSelector({
                     >
                       {translation.title}
                     </p>
+                    {translation.quality && (
+                      <Badge variant='outline' className='ml-auto shrink-0'>
+                        {translation.quality}
+                      </Badge>
+                    )}
                   </div>
                 );
               })}

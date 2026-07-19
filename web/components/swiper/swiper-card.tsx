@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ROUTES } from '@/app/(constants)';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 import { AspectRatio } from '../ui';
 
 interface SwiperCardProps {

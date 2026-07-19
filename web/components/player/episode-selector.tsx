@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { memo, useState } from 'react';
 
