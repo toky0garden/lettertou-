@@ -15,17 +15,17 @@ import {
   Typography
 } from '@/components/ui';
 import { cn } from '@/utils/lib/utils';
-import { getAnime } from '@/utils/api/request';
-import { AnimePlayer } from '../../../../../components/anime/anime-player';
-import type { AnimeResponse } from '@/generated';
+import { getTitle } from '@/shared/api';
+import { AnimePlayer } from '../../../../../components/anime/AnimePlayer';
+import type { AnimeSchema } from '@/shared/api/types.gen';
 
-const fetchAnime = async (slug: string): Promise<AnimeResponse> =>
+const fetchAnime = async (slug: string): Promise<AnimeSchema> =>
   (
-    await getAnime({ params: { slug } }).catch(() => {
+    await getTitle({ query: { slug } }).catch(() => {
       console.error(`Anime not found: ${slug}`);
       notFound();
     })
-  ).data;
+  ).data as AnimeSchema;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -77,17 +77,15 @@ export default async function AnimePage({ params }: { params: Promise<{ slug: st
 
           <div className='bg-card flex flex-col gap-4 rounded-xl border p-5 max-md:hidden'>
             <DetailItem danger label='Возрастное ограничение' value={`${anime.age_rating}+`} />
-            <DetailItem label='Студия' value={anime.anime_studios as string} />
+            <DetailItem label='Студия' value={anime.anime_studios?.join(', ') ?? ''} />
             <DetailItem
               label='Статус'
               value={statusMapping[anime.anime_status as keyof typeof statusMapping]}
             />
             <DetailItem label='Год выхода' value={anime.year as number} />
             <DetailItem label='Тип' value={typeMapping[anime.type!]} />
-            <DetailItem label='Страна' value={anime.countries as string} />
-            {!anime.seasons && (
-              <DetailItem label='Продолжительность эпизода' value={`${anime.duration} мин.`} />
-            )}
+            <DetailItem label='Страна' value={anime.countries?.join(', ') ?? ''} />
+            <DetailItem label='Продолжительность эпизода' value={`${anime.duration} мин.`} />
           </div>
         </aside>
 

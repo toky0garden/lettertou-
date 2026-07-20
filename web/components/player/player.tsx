@@ -1,16 +1,16 @@
 'use client';
 
-import type { PlayerResponse, PlayerTranslationResponse } from '@/generated';
+import type { PlayerSchema, PlayerTranslationSchema } from '@/shared/api/types.gen';
 import { useEffect, useMemo, useState } from 'react';
 import { useWatchHistory } from '@/hooks/useWatchHistory';
-import { useGetAnimeTranslation } from '@/utils/api/hooks';
+import { useGetTranslationQuery } from '@/shared/api';
 import { EpisodeSelector, KodikPlayer, TranslationSelector } from '.';
 
 interface PlayerProps {
   slug: string;
   title: string;
   poster: string | null;
-  player: PlayerResponse;
+  player: PlayerSchema;
 }
 
 export function Player({ slug, title, poster, player }: PlayerProps) {
@@ -19,7 +19,7 @@ export function Player({ slug, title, poster, player }: PlayerProps) {
   const defaultTranslation = translations.at(0);
 
   const [selectedEpisode, setSelectedEpisode] = useState<number>(1);
-  const [selectedTranslation, setSelectedTranslation] = useState<PlayerTranslationResponse | null>(
+  const [selectedTranslation, setSelectedTranslation] = useState<PlayerTranslationSchema | null>(
     defaultTranslation ?? null
   );
 
@@ -27,13 +27,15 @@ export function Player({ slug, title, poster, player }: PlayerProps) {
 
   const canSelect = Boolean(shikiId && selectedTranslation);
 
-  const { data } = useGetAnimeTranslation(
-    {
-      shikiId: shikiId ?? 0,
-      translationId: selectedTranslation?.id ?? 0
+  const { data } = useGetTranslationQuery({
+    request: {
+      query: {
+        shiki_id: shikiId ?? 0,
+        translation_id: selectedTranslation?.id ?? 0
+      }
     },
-    { options: { enabled: canSelect } }
-  );
+    params: { enabled: canSelect }
+  });
 
   const episodes = useMemo(() => {
     if (data?.data && Array.isArray(data.data) && data.data.length > 0) {

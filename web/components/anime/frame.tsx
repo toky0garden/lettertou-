@@ -3,7 +3,8 @@
 import { useHotkeys, useLockScroll, useSwipe } from '@siberiacancode/reactuse';
 import { ChevronLeft, ChevronRight, Images, X } from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import ScrollContainer from 'react-indiana-drag-scroll';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,7 +14,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { cn } from '@/utils/lib/utils';
-import { FrameCard } from './frame-card';
+import { FrameCard } from './FrameCard';
 
 interface FrameProps {
   screenshots: string[];
@@ -24,7 +25,12 @@ export function Frame({ screenshots, title }: FrameProps) {
   const validScreenshots = screenshots.filter(Boolean);
   const [open, setOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const stripRef = useRef<HTMLElement>(null);
   useLockScroll({ enabled: open });
+
+  const scrollStrip = (dir: 'left' | 'right') => {
+    stripRef.current?.scrollBy({ left: dir === 'left' ? -600 : 600, behavior: 'smooth' });
+  };
 
   const swipe = useSwipe<HTMLDivElement>({
     threshold: 64,
@@ -68,18 +74,49 @@ export function Frame({ screenshots, title }: FrameProps) {
 
   return (
     <>
-      <div className='-mx-4 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0'>
-        <div className='flex w-max gap-3 sm:gap-4'>
-          {validScreenshots.map((screenshot, index) => (
-            <FrameCard
-              src={screenshot}
-              key={`${screenshot}-${index}`}
-              index={index}
-              total={validScreenshots.length}
-              onClick={() => openScreenshot(index)}
-            />
-          ))}
-        </div>
+      <div className='relative'>
+        <ScrollContainer
+          innerRef={stripRef}
+          className='scrollbar-hide -mx-4 cursor-grab overflow-x-auto px-4 pb-3 active:cursor-grabbing sm:mx-0 sm:px-0'
+          vertical={false}
+          horizontal
+          nativeMobileScroll
+        >
+          <div className='flex w-max gap-3 sm:gap-4'>
+            {validScreenshots.map((screenshot, index) => (
+              <FrameCard
+                src={screenshot}
+                key={`${screenshot}-${index}`}
+                index={index}
+                total={validScreenshots.length}
+                onClick={() => openScreenshot(index)}
+              />
+            ))}
+          </div>
+        </ScrollContainer>
+
+        {validScreenshots.length > 2 && (
+          <>
+            <Button
+              variant='secondary'
+              size='icon'
+              className='absolute top-1/2 -left-3 hidden -translate-y-1/2 rounded-md shadow-md sm:inline-flex'
+              onClick={() => scrollStrip('left')}
+              aria-label='Предыдущий кадр'
+            >
+              <ChevronLeft />
+            </Button>
+            <Button
+              variant='secondary'
+              size='icon'
+              className='absolute top-1/2 -right-3 hidden -translate-y-1/2 rounded-md shadow-md sm:inline-flex'
+              onClick={() => scrollStrip('right')}
+              aria-label='Следующий кадр'
+            >
+              <ChevronRight />
+            </Button>
+          </>
+        )}
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

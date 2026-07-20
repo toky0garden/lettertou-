@@ -21,7 +21,8 @@ import {
   Input
 } from '@/components/ui';
 import { useConfig } from '@/hooks/useConfig';
-import { useLogin } from '@/utils/api/hooks';
+import { usePostAuthLoginMutation } from '@/shared/api';
+import type { UserSchema } from '@/shared/api/types.gen';
 
 const formSchema = z.object({
   email: z.string().email('Неверный формат почты'),
@@ -30,27 +31,24 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const [, setConfig] = useConfig();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: ''
-    }
+    defaultValues: { email: '', password: '' }
   });
 
-  const { mutateAsync, isPending } = useLogin();
-
+  const { mutateAsync, isPending } = usePostAuthLoginMutation();
   const router = useRouter();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await mutateAsync({ params: values });
-      setConfig({ authenticated: true, user: response.data });
-
-      router.push(ROUTES.PROFILE(response.data.username));
+      const response = await mutateAsync({ body: values });
+      const user = response.data as UserSchema;
+      setConfig({ authenticated: true, user });
+      router.push(ROUTES.PROFILE(user.username));
       toast.success('Вход выполнен');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Не удалось войти');
+    } catch {
+      // ошибка уже показана глобальным обработчиком в QueryProvider
     }
   };
 
@@ -112,21 +110,6 @@ export default function LoginPage() {
                 <Button className='mt-2 w-full cursor-pointer' type='submit'>
                   {isPending ? 'Загрузка...' : 'Войти'}
                 </Button>
-                {/* <Button className='w-full cursor-pointer' variant='outline'>
-                  <svg
-                    className='h-5 w-5'
-                    fill='currentColor'
-                    height='1em'
-                    width='1em'
-                    xmlns='http://www.w3.org/2000/svg'
-                    stroke='currentColor'
-                    strokeWidth='0'
-                    viewBox='0 0 488 512'
-                  >
-                    <path d='M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z'></path>
-                  </svg>
-                  Продолжить с помощью Google
-                </Button> */}
               </CardFooter>
             </Card>
             <div className='text-muted-foreground flex justify-center gap-1 text-sm'>

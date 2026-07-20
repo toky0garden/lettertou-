@@ -1,2 +1,3 @@
-export * from './swiper-card';
-export * from './swiper-list';
+export * from './SwiperCard';
+export * from './SwiperList';
+export * from './SwiperCardFallback';

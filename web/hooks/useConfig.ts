@@ -1,21 +1,15 @@
 import { useLocalStorage } from '@siberiacancode/reactuse';
-import type { UserResponse } from '@/generated';
+import type { UserSchema } from '@/shared/api/types.gen';
 
 export interface Config {
   authenticated: boolean;
-  user: UserResponse | null;
+  user: UserSchema | null;
 }
 
 const DEFAULT: Config = {
   authenticated: false,
   user: null
 };
-
-// const configStorage = localStorage.getItem('config');
-
-// if (configStorage) {
-//   localStorage.setItem('config', JSON.stringify(DEFAULT));
-// }
 
 export const useConfig = () => {
   const { value, set } = useLocalStorage<Config>('config', DEFAULT);

@@ -9,7 +9,7 @@ import { Button, buttonVariants } from '@/components/ui';
 import { cn } from '@/utils/lib/utils';
 import { SearchInput } from './search-input';
 
-const ThemeButton = dynamic(() => import('./theme-button').then((module) => module.ThemeButton), {
+const ThemeButton = dynamic(() => import('./theme-button').then((m) => m.ThemeButton), {
   ssr: false,
   loading: () => (
     <Button size='icon' variant='ghost'>
@@ -18,7 +18,7 @@ const ThemeButton = dynamic(() => import('./theme-button').then((module) => modu
   )
 });
 
-const UserButton = dynamic(() => import('./user-button').then((module) => module.UserButton), {
+const UserButton = dynamic(() => import('./user-button').then((m) => m.UserButton), {
   ssr: false,
   loading: () => (
     <Button size='icon' variant='ghost'>
@@ -27,20 +27,17 @@ const UserButton = dynamic(() => import('./user-button').then((module) => module
   )
 });
 
-const CatalogButton = dynamic(
-  () => import('./catalog-button').then((module) => module.CatalogButton),
-  {
-    ssr: false,
-    loading: () => (
-      <Button size='icon' variant='ghost'>
-        <Loader2Icon className='animate-spin' />
-      </Button>
-    )
-  }
-);
+const CatalogButton = dynamic(() => import('./catalog-button').then((m) => m.CatalogButton), {
+  ssr: false,
+  loading: () => (
+    <Button size='icon' variant='ghost'>
+      <Loader2Icon className='animate-spin' />
+    </Button>
+  )
+});
 
 const MobileNavigation = dynamic(
-  () => import('./mobile-navigation').then((module) => module.MobileNavigation),
+  () => import('./mobile-navigation').then((m) => m.MobileNavigation),
   {
     ssr: false,
     loading: () => (

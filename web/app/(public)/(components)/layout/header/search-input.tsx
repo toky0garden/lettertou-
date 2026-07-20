@@ -1,6 +1,6 @@
 'use client';
 
-import type { AnimeResponse } from '@/generated';
+import type { ShortAnimeSchema } from '@/shared/api/types.gen';
 import type { KeyboardEvent } from 'react';
 import { useClickOutside, useDebounceValue } from '@siberiacancode/reactuse';
 import { ArrowRight, Search, X } from 'lucide-react';
@@ -8,9 +8,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { AnimeSearchResult } from '@/components/search/anime-search-result';
+import { AnimeSearchResult } from '@/components/search/AnimeSearchResult';
 import { Button, Card, CardContent, CardFooter, Input, Skeleton } from '@/components/ui';
-import { searchAnime } from '@/utils/api/request';
+import { getShortSearch } from '@/shared/api';
 
 function SearchItemSkeleton() {
   return (
@@ -26,7 +26,7 @@ function SearchItemSkeleton() {
 
 export function SearchInput() {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<AnimeResponse[]>([]);
+  const [results, setResults] = useState<ShortAnimeSchema[]>([]);
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -66,11 +66,11 @@ export function SearchInput() {
       const requestId = ++requestIdRef.current;
       setIsLoading(true);
       try {
-        const response = await searchAnime({
-          params: { search: debouncedQuery, limit: 5 }
+        const response = await getShortSearch({
+          query: { search: debouncedQuery, limit: 5 }
         });
         if (requestId === requestIdRef.current) {
-          setResults(Array.isArray(response.data) ? response.data : [response.data]);
+          setResults(response.data as ShortAnimeSchema[]);
         }
       } catch (error) {
         if (requestId === requestIdRef.current) {

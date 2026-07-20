@@ -1,6 +1,6 @@
 import { AspectRatio, Badge, Typography } from '@/components/ui';
 import { genres, getGenreBySlug } from '@/components/catalog/genres';
-import { GenreAnimeGrid } from '@/components/catalog/genre-anime-grid';
+import { GenreAnimeGrid } from '@/components/catalog/GenreAnimeGrid';
 import Image from 'next/image';
 import Link from 'next/link';
 

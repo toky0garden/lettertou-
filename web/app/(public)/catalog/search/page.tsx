@@ -1,11 +1,11 @@
 'use client';
 
-import type { AnimeResponse } from '@/generated';
+import type { ShortAnimeSchema } from '@/shared/api/types.gen';
 import { LoaderCircle, Search, Sparkles } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { AnimeSearchResult } from '@/components/search/anime-search-result';
+import { AnimeSearchResult } from '@/components/search/AnimeSearchResult';
 import {
   Badge,
   Button,
@@ -17,7 +17,7 @@ import {
   Input,
   Skeleton
 } from '@/components/ui';
-import { searchAnime } from '@/utils/api/request';
+import { getShortSearch } from '@/shared/api';
 
 function ResultSkeleton() {
   return (
@@ -40,7 +40,7 @@ function CatalogSearchContent() {
   const router = useRouter();
   const paramsQuery = searchParams.get('query')?.trim() || '';
   const [query, setQuery] = useState(paramsQuery);
-  const [results, setResults] = useState<AnimeResponse[]>([]);
+  const [results, setResults] = useState<ShortAnimeSchema[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(Boolean(paramsQuery));
 
@@ -55,10 +55,10 @@ function CatalogSearchContent() {
       setIsLoading(true);
       setHasSearched(true);
       try {
-        const response = await searchAnime({
-          params: { search: normalizedQuery, limit: 20 }
+        const response = await getShortSearch({
+          query: { search: normalizedQuery, limit: 20 }
         });
-        setResults(Array.isArray(response.data) ? response.data : [response.data]);
+        setResults(response.data as ShortAnimeSchema[]);
         router.replace(`/catalog/search?query=${encodeURIComponent(normalizedQuery)}`, {
           scroll: false
         });
@@ -95,7 +95,9 @@ function CatalogSearchContent() {
         <Card>
           <CardHeader>
             <CardTitle>Расширенный поиск</CardTitle>
-            <CardDescription>Введите название — покажем до 20 наиболее подходящих тайтлов.</CardDescription>
+            <CardDescription>
+              Введите название — покажем до 20 наиболее подходящих тайтлов.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form

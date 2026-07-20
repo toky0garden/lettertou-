@@ -9,7 +9,8 @@ import { toast } from 'sonner';
 import { ROUTES } from '@/app/(constants)';
 import { Avatar, AvatarFallback, AvatarImage, Button } from '@/components/ui';
 import { useConfig } from '@/hooks/useConfig';
-import { getCurrentUser, postLogout } from '@/utils/api/request';
+import { getAuthMe, postAuthLogout } from '@/shared/api';
+import type { UserSchema } from '@/shared/api/types.gen';
 
 const itemClassName =
   'data-highlighted:bg-accent data-highlighted:text-accent-foreground flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm outline-none [&_svg]:size-4';
@@ -20,8 +21,10 @@ export function UserButton() {
 
   useEffect(() => {
     if (!config.authenticated || config.user) return;
-    getCurrentUser({})
-      .then((response) => setConfig({ authenticated: true, user: response.data }))
+    getAuthMe()
+      .then((response) =>
+        setConfig({ authenticated: true, user: response.data as UserSchema })
+      )
       .catch(() => setConfig({ authenticated: false, user: null }));
   }, [config.authenticated, config.user, setConfig]);
 
@@ -38,7 +41,7 @@ export function UserButton() {
 
   const logout = async () => {
     try {
-      await postLogout({});
+      await postAuthLogout();
     } finally {
       setConfig({ authenticated: false, user: null });
       router.push(ROUTES.LOGIN);

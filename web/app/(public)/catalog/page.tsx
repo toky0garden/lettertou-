@@ -4,7 +4,8 @@ import { ArrowUpRightIcon, SparklesIcon } from 'lucide-react';
 
 import { genres } from '@/components/catalog/genres';
 import { Badge, Typography } from '@/components/ui';
-import { getGenres } from '@/utils/api/request';
+import { getGenres } from '@/shared/api';
+import type { GenreSchema } from '@/shared/api/types.gen';
 
 const formatCount = new Intl.NumberFormat('ru-RU');
 
@@ -12,7 +13,9 @@ export default async function CatalogPage() {
   // Counts are decorative: the page must render even when the API is down.
   const counts = await getGenres({})
     .then((response) =>
-      Object.fromEntries(response.data.map((genre) => [genre.slug, genre.count]))
+      Object.fromEntries(
+        (response.data as GenreSchema[]).map((genre) => [genre.slug, genre.count])
+      )
     )
     .catch(() => ({}) as Record<string, number | null | undefined>);
 

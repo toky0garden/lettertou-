@@ -1,6 +1,6 @@
 'use client';
 
-import type { PublicUserResponse, UserResponse } from '@/generated';
+import type { PublicUserSchema, UserSchema } from '@/shared/api/types.gen';
 import { LogOut, Mail, Pencil, UserRound } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -17,21 +17,29 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Separator,
   Skeleton
 } from '@/components/ui';
 import { useConfig } from '@/hooks/useConfig';
-import { getProfile, postLogout } from '@/utils/api/request';
+import { getProfileByUsername, postAuthLogout } from '@/shared/api';
 
 function ProfileSkeleton() {
   return (
-    <Card className='mx-auto w-full max-w-3xl'>
-      <CardHeader className='items-center text-center'>
-        <Skeleton className='size-24 rounded-full' />
-        <Skeleton className='h-7 w-40' />
-        <Skeleton className='h-5 w-56' />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className='h-28 w-full rounded-lg' />
+    <Card className='mx-auto w-full max-w-3xl gap-0 overflow-hidden py-0'>
+      <Skeleton className='h-40 w-full rounded-none sm:h-52' />
+      <CardContent className='flex flex-col gap-6 pb-8 sm:px-8'>
+        <div className='-mt-14 sm:-mt-16'>
+          <Skeleton className='size-28 rounded-full sm:size-32' />
+        </div>
+        <div className='flex flex-col gap-2'>
+          <Skeleton className='h-8 w-44' />
+          <Skeleton className='h-4 w-64' />
+        </div>
+        <Separator />
+        <div className='grid gap-3 sm:grid-cols-2'>
+          <Skeleton className='h-[74px] rounded-xl' />
+          <Skeleton className='h-[74px] rounded-xl' />
+        </div>
       </CardContent>
     </Card>
   );
@@ -41,7 +49,7 @@ export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const router = useRouter();
   const [config, setConfig] = useConfig();
-  const [profile, setProfile] = useState<PublicUserResponse | UserResponse | null>(
+  const [profile, setProfile] = useState<PublicUserSchema | UserSchema | null>(
     config.user?.username.toLowerCase() === username.toLowerCase() ? config.user : null
   );
   const [isLoading, setIsLoading] = useState(!profile);
@@ -50,15 +58,15 @@ export default function ProfilePage() {
   useEffect(() => {
     if (profile) return;
 
-    getProfile({ params: { username } })
-      .then((response) => setProfile(response.data))
+    getProfileByUsername({ path: { username } })
+      .then((response) => setProfile(response.data as PublicUserSchema))
       .catch(() => toast.error('Профиль не найден'))
       .finally(() => setIsLoading(false));
   }, [profile, username]);
 
   const handleLogout = async () => {
     try {
-      await postLogout({});
+      await postAuthLogout();
     } finally {
       setConfig({ authenticated: false, user: null });
       router.push(ROUTES.LOGIN);
@@ -82,7 +90,7 @@ export default function ProfilePage() {
             <CardTitle>Профиль не найден</CardTitle>
             <CardDescription>Проверьте имя пользователя или вернитесь на главную.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='flex justify-center'>
             <Button onClick={() => router.push(ROUTES.ROOT)}>На главную</Button>
           </CardContent>
         </Card>
@@ -94,52 +102,67 @@ export default function ProfilePage() {
 
   return (
     <main className='container-wrapper min-h-screen px-4 pt-28 pb-16 sm:px-6'>
-      <Card className='mx-auto w-full max-w-3xl overflow-hidden pt-0'>
-        <div className='bg-muted h-36 sm:h-48'>
-          {profile.banner && (
+      <Card className='mx-auto w-full max-w-3xl gap-0 overflow-hidden py-0'>
+        <div className='bg-muted h-40 sm:h-52'>
+          {profile.banner ? (
             <img src={profile.banner} alt='' className='size-full object-cover' />
+          ) : (
+            <div className='from-primary/25 via-primary/10 to-muted size-full bg-gradient-to-br' />
           )}
         </div>
-        <CardHeader className='items-center px-6 text-center sm:px-10'>
-          <Avatar className='-mt-18 size-28 ring-4 ring-background'>
-            {profile.avatar && <AvatarImage src={profile.avatar} alt={profile.username} />}
-            <AvatarFallback className='text-3xl'>{fallback}</AvatarFallback>
-          </Avatar>
-          <div className='flex flex-col items-center gap-2'>
-            <CardTitle className='text-2xl'>{profile.username}</CardTitle>
-            <Badge variant='default'>Пользователь Ubuyashiki</Badge>
-          </div>
-          <CardDescription>Личный профиль и информация об аккаунте.</CardDescription>
-        </CardHeader>
 
-        <CardContent className='flex flex-col gap-3 px-6 sm:px-10'>
-          <div className='bg-muted/50 flex items-center gap-3 rounded-lg border p-4'>
-            <UserRound className='text-muted-foreground' aria-hidden='true' />
-            <div className='min-w-0'>
-              <p className='text-muted-foreground text-xs'>Имя пользователя</p>
-              <p className='truncate font-medium'>{profile.username}</p>
-            </div>
+        <CardContent className='flex flex-col gap-6 pb-8 sm:px-8'>
+          <div className='-mt-14 flex flex-wrap items-end justify-between gap-3 sm:-mt-16'>
+            <Avatar className='ring-card size-28 ring-4 sm:size-32'>
+              {profile.avatar && <AvatarImage src={profile.avatar} alt={profile.username} />}
+              <AvatarFallback className='text-3xl'>{fallback}</AvatarFallback>
+            </Avatar>
+            {isOwnProfile && (
+              <div className='flex flex-wrap gap-2'>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => router.push(ROUTES.EDIT_PROFILE(profile.username))}
+                >
+                  <Pencil data-icon='inline-start' /> Редактировать
+                </Button>
+                <Button variant='destructive' size='sm' onClick={handleLogout}>
+                  <LogOut data-icon='inline-start' /> Выйти
+                </Button>
+              </div>
+            )}
           </div>
-          {'email' in profile && (
-            <div className='bg-muted/50 flex items-center gap-3 rounded-lg border p-4'>
-              <Mail className='text-muted-foreground' aria-hidden='true' />
+
+          <div className='flex flex-col gap-2'>
+            <div className='flex flex-wrap items-center gap-2.5'>
+              <h1 className='text-2xl font-semibold tracking-tight'>{profile.username}</h1>
+              <Badge variant='secondary'>Пользователь Ubuyashiki</Badge>
+            </div>
+            <p className='text-muted-foreground text-sm'>
+              Личный профиль и информация об аккаунте.
+            </p>
+          </div>
+
+          <Separator />
+
+          <dl className='grid gap-3 sm:grid-cols-2'>
+            <div className='bg-muted/50 flex items-center gap-3 rounded-xl border p-4'>
+              <UserRound className='text-muted-foreground size-5 shrink-0' aria-hidden='true' />
               <div className='min-w-0'>
-                <p className='text-muted-foreground text-xs'>Электронная почта</p>
-                <p className='truncate font-medium'>{profile.email}</p>
+                <dt className='text-muted-foreground text-xs'>Имя пользователя</dt>
+                <dd className='truncate font-medium'>{profile.username}</dd>
               </div>
             </div>
-          )}
-
-          {isOwnProfile && (
-            <div className='mt-3 flex flex-wrap gap-2'>
-              <Button onClick={() => router.push(ROUTES.EDIT_PROFILE(profile.username))}>
-                <Pencil data-icon='inline-start' /> Редактировать профиль
-              </Button>
-              <Button variant='outline' onClick={handleLogout}>
-                <LogOut data-icon='inline-start' /> Выйти из аккаунта
-              </Button>
-            </div>
-          )}
+            {'email' in profile && (
+              <div className='bg-muted/50 flex items-center gap-3 rounded-xl border p-4'>
+                <Mail className='text-muted-foreground size-5 shrink-0' aria-hidden='true' />
+                <div className='min-w-0'>
+                  <dt className='text-muted-foreground text-xs'>Электронная почта</dt>
+                  <dd className='truncate font-medium'>{profile.email}</dd>
+                </div>
+              </div>
+            )}
+          </dl>
         </CardContent>
       </Card>
     </main>
